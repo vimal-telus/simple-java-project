@@ -1,7 +1,7 @@
 name: Build and CodeQL Scan
 
 on:
-  workflow_dispatch
+  workflow_dispatch 
 
 jobs:
   build_and_scan:
@@ -9,26 +9,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-     
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-     
+      # Step 2: Set up JDK 17 with Temurin distribution
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  
+          java-version: '17'
           distribution: 'temurin'
 
-     
+      # Step 3: Build the project using Maven
       - name: Build with Maven
         run: mvn clean install
 
+      # Step 4: Initialize CodeQL for Java and Kotlin
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: java-kotlin
+          languages: java-kotlin  # Supports Java and Kotlin analysis
 
-     
+      # Step 5: Perform CodeQL Analysis
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:java"
