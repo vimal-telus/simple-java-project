@@ -1,43 +1,34 @@
-name: Build and CodeQL Scan
+name: CodeQL
 
 on:
-  workflow_dispatch  # Allows manual trigger of the workflow
+  workflow_dispatch: # Enables manual triggering of the workflow
 
 jobs:
-  build_and_scan:
-    name: Checkout, Build, and Run CodeQL Scan
-    runs-on: ubuntu-latest  # Use Ubuntu runner
+  analyze:
+    name: Analyze ${{ matrix.language }} code
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Analyzes Java code by automatically detecting a build
+          - language: java-kotlin
+            build-mode: autobuild
 
     steps:
-      # Step 1: Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Step 2: Set up JDK 17 with Temurin distribution
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # Step 3: Build the project using Maven
-      - name: Build with Maven
-        run: mvn clean install
-
-      # Step 4: List .java files in the specified directory for debugging
-      - name: List .java Files in src/main/java/works/buddy/samples
-        run: |
-          echo "Listing .java files in src/main/java/works/buddy/samples:"
-          find src/main/java/works/buddy/samples -name "*.java"
-
-      # Step 5: Initialize CodeQL for Java
+      # Initializes CodeQL tools and creates a codebase for analysis.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: java  # Only include 'java' if you don't have Kotlin
+          languages: ${{ matrix.language }}
 
-      # Step 6: Perform CodeQL Analysis
-      - name: Perform CodeQL Analysis
+      # Use autobuild to build the Java project
+      - name: Build Java code
+        if: ${{ matrix.build-mode == 'autobuild' }}
+        run: mvn clean install
+
+      # Runs CodeQL analysis
+      - name: Analyze code with CodeQL
         uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:java"
