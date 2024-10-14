@@ -1,12 +1,12 @@
 name: Build and CodeQL Scan
 
 on:
-  workflow_dispatch 
+  workflow_dispatch  # Allows manual trigger of the workflow
 
 jobs:
   build_and_scan:
     name: Checkout, Build, and Run CodeQL Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use Ubuntu runner
 
     steps:
       # Step 1: Checkout the code
@@ -24,13 +24,19 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
-      # Step 4: Initialize CodeQL for Java and Kotlin
+      # Step 4: List .java files in the specified directory for debugging
+      - name: List .java Files in src/main/java/works/buddy/samples
+        run: |
+          echo "Listing .java files in src/main/java/works/buddy/samples:"
+          find src/main/java/works/buddy/samples -name "*.java"
+
+      # Step 5: Initialize CodeQL for Java
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: java  # Supports Java and Kotlin analysis
+          languages: java  # Only include 'java' if you don't have Kotlin
 
-      # Step 5: Perform CodeQL Analysis
+      # Step 6: Perform CodeQL Analysis
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
